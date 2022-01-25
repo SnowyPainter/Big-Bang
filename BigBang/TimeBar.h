@@ -28,7 +28,7 @@ public:
 		vec.push_back(std::make_tuple(&scrollSpace, 0U));
 		return vec;
 	}
-	int Current() { return position; }
+	int Current() { return position/120; }
 	bool pressed = false;
 	void Scroll(sf::RenderWindow* window, sf::Event event) {
 		auto pos = sf::Mouse::getPosition(*window);
