@@ -9,9 +9,9 @@ private:
 	sf::RectangleShape scrollBar;
 	sf::RectangleShape scrollSpace;
 	int position = 0;
-
 public:
-	TimeBar(sf::VideoMode windowInfo, unsigned int size, unsigned int barSize) {
+	int K;
+	TimeBar(sf::VideoMode windowInfo, unsigned int size, unsigned int barSize, int k = 5):K(k) {
 		auto width = windowInfo.width;
 		auto height = windowInfo.height;
 
@@ -24,11 +24,23 @@ public:
 	}
 	std::vector<std::tuple<sf::Drawable*, unsigned int>> GetCompositions() {
 		auto vec = std::vector<std::tuple<sf::Drawable*, unsigned int>>();
-		vec.push_back(std::make_tuple(&scrollBar, 1U));
-		vec.push_back(std::make_tuple(&scrollSpace, 0U));
+		vec.push_back(std::make_tuple(&scrollBar, 2U));
+		vec.push_back(std::make_tuple(&scrollSpace, 1U));
 		return vec;
 	}
-	int Current() { return position/120; }
+	/// <summary>
+	/// BigBang 4000 seconds
+	/// </summary>
+	/// <param name="event"></param>
+	/// <param name="window"></param>
+	int Current() { return position/K; }
+
+	//Keyboard controlling
+	void Plus(int x) {
+		scrollBar.setPosition(scrollBar.getPosition().x + x, scrollBar.getPosition().y);
+		position += x;
+	}
+
 	bool pressed = false;
 	void Scroll(sf::RenderWindow* window, sf::Event event) {
 		auto pos = sf::Mouse::getPosition(*window);

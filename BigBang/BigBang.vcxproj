@@ -148,7 +148,9 @@
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="BigBang.h" />
     <ClInclude Include="Error.h" />
+    <ClInclude Include="Particle.h" />
     <ClInclude Include="TimeBar.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

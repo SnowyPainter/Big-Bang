@@ -4,18 +4,33 @@
 #include <vector>
 #include <tuple>
 #include <format>
+#include <random>
 
+#include "Particle.h"
 #include "TimeBar.h"
 #include "Error.h"
+#include "BigBang.h"
 
 using namespace std;
 
+enum class ParticleType {
+    Quark = 3,
+    Electron = 3,
+    Atom = 5,
+};
+
+ErrorReport e = ErrorReport("bigbang program error.txt");
 sf::Font mainFont;
 
 sf::Text newText(string text) {
     sf::Text t = sf::Text(text, mainFont, 20U);
     t.setFillColor(sf::Color::White);
     return t;
+}
+float randomRange(int x, int x2) {
+    static std::default_random_engine e;
+    static std::uniform_real_distribution<> dis(x, x2); // rage 0 - 1
+    return dis(e);
 }
 void display(sf::RenderWindow* window, vector<tuple<sf::Drawable*, unsigned int>>* drawables) {
     int minZ = 99999;
@@ -35,8 +50,8 @@ void display(sf::RenderWindow* window, vector<tuple<sf::Drawable*, unsigned int>
         }
     }
 }
+
 int main() {
-    ErrorReport e = ErrorReport("bigbang program error.txt");
     //pf
     if (!mainFont.loadFromFile("NotoSansKR-Medium.otf")) {
         e.WriteLine("Failed to load font NotoSansKR-Medium.otf");
@@ -45,14 +60,53 @@ int main() {
 
     auto windowVideoMode = sf::VideoMode(1000, 800);
     sf::RenderWindow window(windowVideoMode, "Big Bang", sf::Style::Titlebar | sf::Style::Close);
-    
+    window.setKeyRepeatEnabled(false);
+
+    vector<tuple<sf::Drawable*, unsigned int>> drawables = vector<tuple<sf::Drawable*, unsigned int>>();
+
+    const int m = 3;
+
     TimeBar timeBar = TimeBar(windowVideoMode, 40, 100);
     sf::Text timeIndicator = newText("0");
-
-    auto drawables = vector<tuple<sf::Drawable*, unsigned int>>();
+    
     auto compositions = timeBar.GetCompositions();
     drawables.insert(drawables.end(), compositions.begin(), compositions.end());
-    drawables.push_back(make_tuple(&timeIndicator, 0U));
+    drawables.push_back(make_tuple(&timeIndicator, 1U));
+
+    BigBang bigbang = BigBang(sf::Vector2f(windowVideoMode.width / 2, windowVideoMode.height / 2));
+    drawables.push_back(make_tuple(&bigbang, 0U));
+    vector<QuarkGroup> proton = vector<QuarkGroup>();
+    vector<QuarkGroup> neutron = vector<QuarkGroup>();
+    vector<Particle> electron = vector<Particle>();
+    vector<Particle> atom = vector<Particle>();
+
+    
+    for (int i = 0; i < m; i++) {
+        auto p = QuarkGroup(Nucleus::Proton, (int)ParticleType::Quark, randomRange(-10, 10));
+        auto n = QuarkGroup(Nucleus::Neutron, (int)ParticleType::Quark, randomRange(-10, 10));
+        auto e = Particle("Electron", (int)ParticleType::Electron, randomRange(-15, 15));
+        auto a = Particle("Atom", (int)ParticleType::Atom, randomRange(-15, 15));
+        p.Hide = true; n.Hide = true; e.Hide = true; a.Hide = true;
+        p.SetBackgroundColor(sf::Color::Yellow);
+        n.SetBackgroundColor(sf::Color::Green);
+        e.SetBackgroundColor(sf::Color::Cyan);
+        a.SetBackgroundColor(sf::Color::Blue);
+
+        proton.push_back(p);
+        neutron.push_back(n);
+        electron.push_back(e);
+        atom.push_back(a);
+    }
+    for (int i = 0; i < m; i++) {
+        bigbang.AddQuark(&proton[i]);
+        bigbang.AddQuark(&neutron[i]);
+        bigbang.AddParticle(&electron[i]);
+        bigbang.AddParticle(&atom[i]);
+    }
+
+    int currentTime = 0;
+    int k = 3;
+    int quarkStart = 50, atomStart = 150; 
 
     while (window.isOpen())
     {
@@ -62,10 +116,41 @@ int main() {
             if (event.type == sf::Event::Closed)
                 window.close();
             timeBar.Scroll(&window, event);
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
+                timeBar.Plus(k * -1);
+            else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
+                timeBar.Plus(k);
         }
 
+        int current = timeBar.Current();
+        if (current > quarkStart && current < quarkStart + k * 3 && currentTime < current) {
+            for (int i = 0; i < m; i++) {
+                neutron[i].Hide = false; proton[i].Hide = false; electron[i].Hide = false;
+                neutron[i].AddParticle();
+                proton[i].AddParticle();
+            }
+            
+        } 
+        else if (current > quarkStart && current < quarkStart + k * 3 && currentTime > current) {
+            for (int i = 0; i < m; i++) {
+                neutron[i].PopParticle();
+                proton[i].PopParticle();
+            }
+        }
+
+        if (current < quarkStart) {
+            for (int i = 0; i < m; i++) {
+                neutron[i].Hide = true; proton[i].Hide = true; electron[i].Hide = true;
+            }
+        }
+        if (current > atomStart) for(int i = 0;i < m;i++) atom[i].Hide = false;
+        if (current < atomStart) for (int i = 0; i < m; i++) atom[i].Hide = true;
+
+        currentTime = current;
+
         timeIndicator.setPosition(windowVideoMode.width / 2 - timeIndicator.getLocalBounds().width / 2, 10);
-        timeIndicator.setString("After " + std::to_string(timeBar.Current()) + " Big-Bang");
+        timeIndicator.setString("After " + std::to_string(timeBar.Current()) + " Seconds");
+        bigbang.Expand(current+1);
 
         window.clear(sf::Color::Black);
         
