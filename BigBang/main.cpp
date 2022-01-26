@@ -99,7 +99,7 @@ int main() {
         bigbang.AddParticle(&electron[i]);
     }
 
-    int currentTime = 0;
+    int currStep = 0;
     int k = 30;
     int quarkStart = 50; 
 
@@ -115,26 +115,28 @@ int main() {
                 timeBar.Plus(k * -1);
             else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
                 timeBar.Plus(k);
-            else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) {
+        }
+
+        int current = timeBar.Current();
+        int step = current / 120;
+        if (currStep != step) {
+            if (currStep < step) {
                 for (int i = 0; i < particleN; i++) {
                     neutron[i].AddParticle();
                     proton[i].AddParticle();
                 }
             }
-            else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down)) {
+            else if (currStep > step) {
                 for (int i = 0; i < particleN; i++) {
                     neutron[i].PopParticle();
                     proton[i].PopParticle();
                 }
             }
         }
-
-        int current = timeBar.Current();
-        
-        currentTime = current;
+        currStep = step;
 
         timeIndicator.setPosition(windowVideoMode.width / 2 - timeIndicator.getLocalBounds().width / 2, 10);
-        timeIndicator.setString("After " + std::to_string(timeBar.Current()) + " Seconds");
+        timeIndicator.setString("After " + std::to_string(current/5) + " Seconds");
         bigbang.Expand(current+1);
 
         window.clear(sf::Color::Black);
