@@ -10,8 +10,7 @@ private:
 	sf::RectangleShape scrollSpace;
 	int position = 0;
 public:
-	int K;
-	TimeBar(sf::VideoMode windowInfo, unsigned int size, unsigned int barSize, int k = 5):K(k) {
+	TimeBar(sf::VideoMode windowInfo, unsigned int size, unsigned int barSize) {
 		auto width = windowInfo.width;
 		auto height = windowInfo.height;
 
@@ -33,7 +32,7 @@ public:
 	/// </summary>
 	/// <param name="event"></param>
 	/// <param name="window"></param>
-	int Current() { return position/K; }
+	int Current() { return position; }
 
 	//Keyboard controlling
 	void Plus(int x) {

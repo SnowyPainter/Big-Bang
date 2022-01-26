@@ -100,7 +100,7 @@ int main() {
     }
 
     int currentTime = 0;
-    int k = 10;
+    int k = 30;
     int quarkStart = 50; 
 
     while (window.isOpen())
@@ -115,24 +115,22 @@ int main() {
                 timeBar.Plus(k * -1);
             else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
                 timeBar.Plus(k);
+            else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) {
+                for (int i = 0; i < particleN; i++) {
+                    neutron[i].AddParticle();
+                    proton[i].AddParticle();
+                }
+            }
+            else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down)) {
+                for (int i = 0; i < particleN; i++) {
+                    neutron[i].PopParticle();
+                    proton[i].PopParticle();
+                }
+            }
         }
 
         int current = timeBar.Current();
-        if (current > quarkStart && current < quarkStart + k * 3 && currentTime < current) {
-            for (int i = 0; i < particleN; i++) {
-                neutron[i].Hide = false; proton[i].Hide = false; electron[i].Hide = false;
-                neutron[i].AddParticle();
-                proton[i].AddParticle();
-            }
-            
-        } 
-        else if (current > quarkStart && current < quarkStart + k * 3 && currentTime > current) {
-            for (int i = 0; i < particleN; i++) {
-                neutron[i].PopParticle();
-                proton[i].PopParticle();
-            }
-        }
-
+        
         currentTime = current;
 
         timeIndicator.setPosition(windowVideoMode.width / 2 - timeIndicator.getLocalBounds().width / 2, 10);
