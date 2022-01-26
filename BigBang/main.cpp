@@ -14,8 +14,8 @@
 using namespace std;
 
 enum class ParticleType {
-    Quark = 3,
-    Electron = 3,
+    Quark = 5,
+    Electron = 5,
     Atom = 5,
 };
 
@@ -64,8 +64,8 @@ int main() {
 
     vector<tuple<sf::Drawable*, unsigned int>> drawables = vector<tuple<sf::Drawable*, unsigned int>>();
 
-    const int m = 3;
-
+    const int particleN = 5;
+    const int r = 1;
     TimeBar timeBar = TimeBar(windowVideoMode, 40, 100);
     sf::Text timeIndicator = newText("0");
     
@@ -78,35 +78,30 @@ int main() {
     vector<QuarkGroup> proton = vector<QuarkGroup>();
     vector<QuarkGroup> neutron = vector<QuarkGroup>();
     vector<Particle> electron = vector<Particle>();
-    vector<Particle> atom = vector<Particle>();
+    //vector<Particle> atom = vector<Particle>();
 
     
-    for (int i = 0; i < m; i++) {
-        auto p = QuarkGroup(Nucleus::Proton, (int)ParticleType::Quark, randomRange(-10, 10));
-        auto n = QuarkGroup(Nucleus::Neutron, (int)ParticleType::Quark, randomRange(-10, 10));
-        auto e = Particle("Electron", (int)ParticleType::Electron, randomRange(-15, 15));
-        auto a = Particle("Atom", (int)ParticleType::Atom, randomRange(-15, 15));
-        p.Hide = true; n.Hide = true; e.Hide = true; a.Hide = true;
+    for (int i = 0; i < particleN; i++) {
+        auto p = QuarkGroup(Nucleus::Proton, (int)ParticleType::Quark, randomRange(-r, r));
+        auto n = QuarkGroup(Nucleus::Neutron, (int)ParticleType::Quark, randomRange(-r, r));
+        auto e = Particle("Electron", (int)ParticleType::Electron, randomRange(-r, r));
         p.SetBackgroundColor(sf::Color::Yellow);
         n.SetBackgroundColor(sf::Color::Green);
         e.SetBackgroundColor(sf::Color::Cyan);
-        a.SetBackgroundColor(sf::Color::Blue);
 
         proton.push_back(p);
         neutron.push_back(n);
         electron.push_back(e);
-        atom.push_back(a);
     }
-    for (int i = 0; i < m; i++) {
+    for (int i = 0; i < particleN; i++) {
         bigbang.AddQuark(&proton[i]);
         bigbang.AddQuark(&neutron[i]);
         bigbang.AddParticle(&electron[i]);
-        bigbang.AddParticle(&atom[i]);
     }
 
     int currentTime = 0;
-    int k = 3;
-    int quarkStart = 50, atomStart = 150; 
+    int k = 10;
+    int quarkStart = 50; 
 
     while (window.isOpen())
     {
@@ -124,7 +119,7 @@ int main() {
 
         int current = timeBar.Current();
         if (current > quarkStart && current < quarkStart + k * 3 && currentTime < current) {
-            for (int i = 0; i < m; i++) {
+            for (int i = 0; i < particleN; i++) {
                 neutron[i].Hide = false; proton[i].Hide = false; electron[i].Hide = false;
                 neutron[i].AddParticle();
                 proton[i].AddParticle();
@@ -132,19 +127,11 @@ int main() {
             
         } 
         else if (current > quarkStart && current < quarkStart + k * 3 && currentTime > current) {
-            for (int i = 0; i < m; i++) {
+            for (int i = 0; i < particleN; i++) {
                 neutron[i].PopParticle();
                 proton[i].PopParticle();
             }
         }
-
-        if (current < quarkStart) {
-            for (int i = 0; i < m; i++) {
-                neutron[i].Hide = true; proton[i].Hide = true; electron[i].Hide = true;
-            }
-        }
-        if (current > atomStart) for(int i = 0;i < m;i++) atom[i].Hide = false;
-        if (current < atomStart) for (int i = 0; i < m; i++) atom[i].Hide = true;
 
         currentTime = current;
 

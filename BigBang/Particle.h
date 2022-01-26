@@ -3,6 +3,7 @@
 #include <iostream>
 #include <string>
 #include <functional>
+#include <cmath>
 
 enum class Nucleus {
 	Proton,
@@ -12,7 +13,7 @@ enum class Nucleus {
 class Particle : public sf::Drawable {
 protected:
 	std::vector<sf::CircleShape> circle;
-	std::function<float(int)> move;
+	std::function<float(float)> move;
 
 	virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const
 	{
@@ -31,14 +32,16 @@ protected:
 		return dis(e);
 	}
 	int direction = 1;
+	const float slope = 0;
+	
 public:
 	std::string Name;
 	bool Hide = false;
-	Particle(std::string name, int radius, float randomSeed) :Name(name) {
+	Particle(std::string name, int radius, float randomSeed) :Name(name), slope(randomSeed) {
 		auto circle = sf::CircleShape(radius);
 		this->circle.push_back(circle);
 		direction = (randomSeed > 0) ? -1 : 1;
-		move = [a = randomSeed](int x)-> float {
+		move = [a = slope](float x)-> float {
 			return a * x;
 		};
 	}
@@ -51,7 +54,8 @@ public:
 	}
 	void Expand(sf::Vector2f center, int x) {
 		x = x * direction;
-		SetPosition(center.x + x, center.y + move(x));
+		float posx = std::cos(std::pow(std::tan(slope), -1)) * x * 4;
+		SetPosition(center.x + posx, center.y + move(posx));
 	}
 };
 
@@ -103,7 +107,8 @@ public:
 	}
 	void Expand(sf::Vector2f center, int x) {
 		x = x * direction;
-		SetPosition(center.x + x, center.y + move(x));
+		float posx = std::cos(std::pow(std::tan(slope), -1)) * x * 2;
+		SetPosition(center.x + posx, center.y + move(posx));
 		reform();
 	}
 };
